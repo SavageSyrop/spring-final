@@ -1,0 +1,52 @@
+server:
+  port: 8880
+
+jwt:
+  secret: 0J3QtdCz0YPRgSDigJQg0YbQsNGA0YHQutC40Lkg0YLQuNGC0YPQuyDQsiDQrdGE0LjQvtC/0LjQuC4=
+  tokenDuration: 3600000
+  issuer: api-gateway
+
+spring:
+  main:
+    allow-bean-definition-overriding: true
+    web-application-type: reactive
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      default-filters:
+        - PreserveHostHeader
+        - AddResponseHeader=X-Gateway, api-gateway
+      routes:
+        - id: hotel-service
+          uri: lb://hotel-service
+          predicates:
+            - Path=/hotels/**
+        - id: booking-service
+          uri: lb://booking-service
+          predicates:
+            - Path=/bookings/**, /auth/**
+    discovery:
+      locator:
+        enabled: true
+        lower-case-service-id: true
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8888/eureka/
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+springdoc:
+  swagger-ui:
+    urls:
+      - name: booking-service
+        url: /bookings/v3/api-docs
+      - name: hotel-service
+        url: /hotels/v3/api-docs
+
