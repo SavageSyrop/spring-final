@@ -21,11 +21,11 @@ spring:
         - id: hotel-service
           uri: lb://hotel-service
           predicates:
-            - Path=/hotels/**
+            - Path=/api/hotels/**
         - id: booking-service
           uri: lb://booking-service
           predicates:
-            - Path=/bookings/**, /auth/**
+            - Path=/api/bookings/**, /auth/**
     discovery:
       locator:
         enabled: true
