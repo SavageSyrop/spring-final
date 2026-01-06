@@ -66,12 +66,9 @@ public class JwtTokenService {
 
     public String generateToken(InternalAuthData userDetails) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("userId", userDetails.getUserId());
-        claims.put("email", userDetails.getEmail());
         claims.put("roles", userDetails.getRoles());
-        claims.put("permissions", userDetails.getPermissions());
 
-        return generateToken(claims, userDetails.getEmail());
+        return generateToken(claims, userDetails.getUsername());
     }
 
     public boolean validateToken(String token) {
@@ -134,9 +131,9 @@ public class JwtTokenService {
         return claims.get("userId", String.class);
     }
 
-    public String getEmailFromToken(String token) {
+    public String getUsernameFromToken(String token) {
         Claims claims = parseClaims(token);
-        return claims.get("email", String.class);
+        return claims.get("username", String.class);
     }
 
     public Map<String, Object> getAllClaimsFromToken(String token) {

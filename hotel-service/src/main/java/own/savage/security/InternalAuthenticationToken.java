@@ -8,15 +8,15 @@ import java.util.Collection;
 
 public class InternalAuthenticationToken extends AbstractAuthenticationToken {
 
-    private final String userId;
+    private final String username;
     @Getter
     private final InternalAuthData authData;
 
-    public InternalAuthenticationToken(String userId,
+    public InternalAuthenticationToken(String username,
                                        Collection<? extends GrantedAuthority> authorities,
                                        InternalAuthData authData) {
         super(authorities);
-        this.userId = userId;
+        this.username = username;
         this.authData = authData;
         super.setAuthenticated(true);
     }
@@ -28,6 +28,6 @@ public class InternalAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getPrincipal() {
-        return userId;
+        return username;
     }
 }

@@ -13,7 +13,9 @@ public class Room extends AbstractEntity {
 
     private String number;
 
-    private boolean rentable;
+    private boolean available;
+
+    private Long timesBooked;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Hotel hotel;

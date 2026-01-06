@@ -42,10 +42,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
             // Создаем внутренние данные авторизации
             InternalAuthData authContext = InternalAuthData.builder()
-                    .userId(claims.getSubject())
-                    .email(claims.get("email", String.class))
+                    .username(claims.getSubject())
                     .roles(claims.get("roles", List.class))
-                    .permissions(claims.get("permissions", List.class))
                     .build();
 
             // Кодируем в Base64 для передачи

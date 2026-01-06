@@ -5,15 +5,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class RoomDto {
-
+public class RoomStatsDto {
     private Long id;
-
     private String number;
-
-    private boolean available;
-
-    private Long timesBooked;
-
-    private Long hotelId;
+    private long timesBooked;
 }

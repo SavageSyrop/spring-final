@@ -45,12 +45,8 @@ public class InternalAuthFilter extends OncePerRequestFilter {
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .collect(Collectors.toList());
 
-                authContext.getPermissions().forEach(permission ->
-                        authorities.add(new SimpleGrantedAuthority(permission)));
-
-
                 InternalAuthenticationToken authToken = new InternalAuthenticationToken(
-                        authContext.getUserId(),
+                        authContext.getUsername(),
                         authorities,
                         authContext
                 );

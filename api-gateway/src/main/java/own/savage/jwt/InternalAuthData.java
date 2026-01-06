@@ -12,8 +12,6 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class InternalAuthData {
-    private String userId;
-    private String email;
+    private String username;
     private List<String> roles;
-    private List<String> permissions;
 }

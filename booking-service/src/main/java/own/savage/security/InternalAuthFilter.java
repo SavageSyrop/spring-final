@@ -36,22 +36,16 @@ public class InternalAuthFilter extends OncePerRequestFilter {
 
         if (StringUtils.hasText(internalAuthHeader)) {
             try {
-                // Декодируем Base64
+
                 byte[] decodedBytes = Base64.getDecoder().decode(internalAuthHeader);
                 InternalAuthData authContext = objectMapper.readValue(decodedBytes, InternalAuthData.class);
 
-                // Создаем Authentication объект
                 List<GrantedAuthority> authorities = authContext.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
                         .collect(Collectors.toList());
 
-                // Добавляем permissions как authorities
-                authContext.getPermissions().forEach(permission ->
-                        authorities.add(new SimpleGrantedAuthority(permission)));
-
-
                 InternalAuthenticationToken authToken = new InternalAuthenticationToken(
-                        authContext.getUserId(),
+                        authContext.getUsername(),
                         authorities,
                         authContext
                 );

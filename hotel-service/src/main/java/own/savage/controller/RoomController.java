@@ -13,7 +13,7 @@ import own.savage.entities.RoomReservationLock;
 import own.savage.service.HotelService;
 
 @RestController
-@RequestMapping("/rooms")
+@RequestMapping("/api/rooms")
 public class RoomController {
     @Autowired
     private final HotelService hotelService;
