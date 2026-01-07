@@ -68,8 +68,6 @@ public class RoomController {
         }
     }
 
-    //popularRooms
-
     private RoomDto convertToDto(Room room) throws ParseException {
         RoomDto roomDto = modelMapper.map(room, RoomDto.class);
         roomDto.setHotelId(room.getHotel().getId());

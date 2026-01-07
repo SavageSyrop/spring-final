@@ -11,7 +11,7 @@ import lombok.Setter;
 @Setter
 public class Room extends AbstractEntity {
 
-    private String number;
+    private Long number;
 
     private boolean available;
 

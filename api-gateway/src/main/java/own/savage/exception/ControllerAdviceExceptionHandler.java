@@ -1,0 +1,31 @@
+package own.savage.exception;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.AuthorizationServiceException;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.context.request.WebRequest;
+
+@RestControllerAdvice
+public class ControllerAdviceExceptionHandler {
+    @ExceptionHandler(IllegalStateException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ExceptionBody handleIllegalState(WebRequest request, IllegalStateException e) {
+        return new ExceptionBody(e.getMessage(), request.getHeader("X-Correlation-Id"));
+    }
+
+    @ExceptionHandler(value = {AuthenticationException.class, AuthorizationServiceException.class})
+    @ResponseStatus(HttpStatus.FORBIDDEN)
+    public ExceptionBody handleAuthentication(WebRequest request, RuntimeException e) {
+        return new ExceptionBody(e.getMessage(), request.getHeader("X-Correlation-Id"));
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ExceptionBody handleException(WebRequest request, Exception e) {
+        e.printStackTrace();
+        return new ExceptionBody("Internal error", request.getHeader("X-Correlation-Id"));
+    }
+}

@@ -4,6 +4,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 import own.savage.entities.Room;
 
+import java.util.List;
+
 @Repository
 public interface RoomDAO extends JpaRepository<Room, Long> {
+    List<Room> findByHotelIdOrderByTimesBookedDesc(Long hotelId);
 }

@@ -35,31 +35,33 @@ public class BookingController {
 
     @PostMapping
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<BookingDto> create(@RequestBody RoomReservationDto roomReservationDto) {
+    public ResponseEntity<BookingDto> createBooking(@RequestBody RoomReservationDto roomReservationDto) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return ResponseEntity.ok(convertToDto(bookingService.createBooking(userDetails.getUsername(), roomReservationDto.getRoomId(), roomReservationDto.getStartDate(), roomReservationDto.getEndDate())));
+        return ResponseEntity.ok(convertToDto(bookingService.createReservation(userDetails.getUsername(), roomReservationDto.getRoomId(), roomReservationDto.getStartDate(), roomReservationDto.getEndDate())));
     }
 
-    @DeleteMapping
+    @PostMapping("/{bookingId}/cancel")
     @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<BookingDto> cancelBooking(@RequestBody BookingDto bookingDto) {
+    public ResponseEntity<BookingDto> cancelBooking(@PathVariable Long bookingId) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Optional<Booking> booking = bookingService.getBookingById(bookingDto.getId());
+        Optional<Booking> booking = bookingService.getBookingById(bookingId);
         if (booking.isPresent()) {
             if (!Objects.equals(userDetails.getUsername(), booking.get().getUsername())) {
                 throw new AccessDeniedException("Not your booking");
             } else {
+                bookingService.cancelReservation(bookingId);
                 Booking bookingUpdated = booking.get();
                 bookingUpdated.setStatus(BookingStatus.CANCELLED);
                 return ResponseEntity.ok(convertToDto(bookingService.updateBooking(bookingUpdated)));
             }
         } else {
-            throw new EntityNotFoundException("Booking " + bookingDto.getId() + " doesnt exist");
+            throw new EntityNotFoundException("Booking " + bookingId + " doesnt exist");
         }
     }
 
     @GetMapping
+    @PreAuthorize("hasRole('ROLE_USER')")
     public ResponseEntity<List<BookingDto>> myBookings() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<BookingDto> dtos = new ArrayList<>();
@@ -70,8 +72,8 @@ public class BookingController {
     }
 
     @GetMapping("/suggestions")
-    public Mono<List<RoomStatsDto>> suggestions() {
-        return bookingService.getPopularRooms();
+    public Mono<List<RoomStatsDto>> suggestions(@RequestParam Long hotelId) {
+        return bookingService.getPopularRooms(hotelId);
     }
 
     private BookingDto convertToDto(Booking booking) throws ParseException {

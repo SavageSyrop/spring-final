@@ -40,7 +40,7 @@ public class BookingService {
     }
 
     @Transactional
-    public Booking createBooking(String username, Long roomId, LocalDate start, LocalDate end) {
+    public Booking createReservation(String username, Long roomId, LocalDate start, LocalDate end) {
         Booking booking = new Booking();
         booking.setUsername(username);
         booking.setRoomId(roomId);
@@ -55,13 +55,13 @@ public class BookingService {
                 "endDate", end.toString()
         );
 
-        callHotel("/api/rooms/" + roomId + "/hold", payload).block(timeout);
+        createReservation("/api/rooms/" + roomId + "/hold", payload).block(timeout);
         booking.setStatus(BookingStatus.CONFIRMED);
 
         return bookingDAO.save(booking);
     }
 
-    private Mono<String> callHotel(String path, Map<String, String> payload) {
+    private Mono<String> createReservation(String path, Map<String, String> payload) {
         return webClient.post()
                 .uri(path)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -72,9 +72,9 @@ public class BookingService {
                 .retryWhen(Retry.backoff(retries, Duration.ofMillis(600)).maxBackoff(Duration.ofSeconds(4)));
     }
 
-    public Mono<List<RoomStatsDto>> getPopularRooms() {
+    public Mono<List<RoomStatsDto>> getPopularRooms(Long hotelId) {
         return webClient.get()
-                .uri("/hotels/rooms")
+                .uri("/api/hotels/" + hotelId + "/rooms/popular")
                 .retrieve()
                 .bodyToFlux(RoomStatsDto.class)
                 .collectList()
@@ -94,6 +94,19 @@ public class BookingService {
 
     public List<Booking> findAllByUsername(String username) {
         return bookingDAO.findAllByUsername(username);
+    }
+
+    public Mono<String> cancelReservation(Long bookingId) {
+        return webClient.post()
+                .uri("/api/hotels/release" + bookingId)
+                .retrieve()
+                .bodyToMono(String.class)
+                .timeout(timeout)
+                .retryWhen(Retry.backoff(retries, Duration.ofMillis(600)).maxBackoff(Duration.ofSeconds(4)));
+    }
+
+    public Booking save(Booking booking) {
+        return bookingDAO.save(booking);
     }
 }
 

@@ -41,12 +41,3 @@ management:
     web:
       exposure:
         include: "*"
-
-springdoc:
-  swagger-ui:
-    urls:
-      - name: booking-service
-        url: /bookings/v3/api-docs
-      - name: hotel-service
-        url: /hotels/v3/api-docs
-

@@ -23,6 +23,7 @@ import own.savage.jwt.JwtAuthFilter;
 public class GatewaySecurityConfig {
 
     private final JwtAuthFilter jwtAuthenticationFilter;
+    private final ReadWriteCorrelationFilter readWriteCorrelationFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -32,29 +33,21 @@ public class GatewaySecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                                .requestMatchers(
-                                        "/",
-                                        "/auth/login",
-                                        "/auth/register"
-                                ).permitAll()
-                                // Swagger/OpenAPI документация
-                                .requestMatchers(
-                                        "/swagger-ui.html",
-                                        "/swagger-ui/**",
-                                        "/v3/api-docs/**",
-                                        "/swagger-resources/**"
-                                ).permitAll()
+                        .requestMatchers(
+                                "/",
+                                "/auth/login",
+                                "/auth/register"
+                        ).permitAll()
 
-                                // Actuator (с разным уровнем доступа)
-                                .requestMatchers("/actuator/health", "/actuator/info").permitAll()
-                                .requestMatchers("/actuator/**").hasRole("ADMIN")
+                        // Actuator (с разным уровнем доступа)
+                        .requestMatchers("/actuator/health", "/actuator/info").permitAll()
+                        .requestMatchers("/actuator/**").hasRole("ADMIN")
 
-//                        .requestMatchers(HttpMethod.GET, "/api/hotel/**").hasAnyRole("USER", "ADMIN")
-
-                                // Все остальные запросы
-                                .anyRequest().authenticated()
+                        // Все остальные запросы
+                        .anyRequest().authenticated()
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(readWriteCorrelationFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(jwtAuthenticationFilter, ReadWriteCorrelationFilter.class)
                 .build();
     }
 }

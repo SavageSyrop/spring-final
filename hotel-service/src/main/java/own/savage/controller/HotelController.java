@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import own.savage.dto.HotelDto;
 import own.savage.dto.RoomDto;
 import own.savage.entities.Hotel;
+import own.savage.entities.Room;
 import own.savage.service.HotelService;
 
 import java.util.ArrayList;
@@ -86,6 +87,17 @@ public class HotelController {
         }
     }
 
+    @PostMapping("/{hotelId}/rooms/popular")
+    public List<RoomDto> getPopilarRooms(@PathVariable Long hotelId) {
+        List<RoomDto> dtos = new ArrayList<>();
+        List<Room> popularRooms = hotelService.getMostPopularRoomsInHotel(hotelId);
+
+        for (Room room : popularRooms) {
+            dtos.add(convertToDto(room));
+        }
+        return dtos;
+    }
+
     private HotelDto convertToDto(Hotel hotel) throws ParseException {
         HotelDto hotelDto = modelMapper.map(hotel, HotelDto.class);
 
@@ -100,6 +112,12 @@ public class HotelController {
 
     private Hotel convertToEntity(HotelDto hotelDto) throws ParseException {
         return modelMapper.map(hotelDto, Hotel.class);
+    }
+
+    private RoomDto convertToDto(Room room) throws ParseException {
+        RoomDto roomDto = modelMapper.map(room, RoomDto.class);
+        roomDto.setHotelId(room.getHotel().getId());
+        return roomDto;
     }
 }
 

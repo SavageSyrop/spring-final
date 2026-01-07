@@ -60,6 +60,10 @@ public class HotelService {
         return roomDAO.save(r);
     }
 
+    public RoomReservationLock saveRoomReservationLock(RoomReservationLock r) {
+        return lockDAO.save(r);
+    }
+
     public void deleteRoom(Long id) {
         roomDAO.deleteById(id);
     }
@@ -94,6 +98,10 @@ public class HotelService {
             lock.setStatus(RoomStatus.FREE);
         }
         return lockDAO.save(lock);
+    }
+
+    public List<Room> getMostPopularRoomsInHotel(Long hotelId) {
+        return roomDAO.findByHotelIdOrderByTimesBookedDesc(hotelId);
     }
 }
 
