@@ -63,7 +63,7 @@ public class JwtAuthFilter implements WebFilter {
     private String extractJwtFromRequest(ServerWebExchange exchange) {
         ServerHttpRequest request = exchange.getRequest();
         HttpHeaders headers = request.getHeaders();
-        List<String> authValues = headers.get("X-Correlation-Id");
+        List<String> authValues = headers.get("Authorization");
 
         if (authValues == null || authValues.isEmpty()) {
             return null;
