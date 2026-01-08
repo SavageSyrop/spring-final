@@ -23,10 +23,10 @@ spring:
           uri: lb://booking-service
           predicates:
             - Path=/api/bookings/**, /api/users/**
-    discovery:
-      locator:
-        enabled: true
-        lower-case-service-id: true
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
 
 eureka:
   client:
