@@ -10,9 +10,6 @@ import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import own.savage.jwt.JwtAuthFilter;
-import reactor.core.publisher.Mono;
-
-import static org.springframework.security.config.web.server.SecurityWebFiltersOrder.FIRST;
 
 @Configuration
 @EnableWebFluxSecurity

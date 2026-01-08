@@ -1,25 +1,27 @@
 package own.savage.security;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Component
-public class InternalAuthFilter extends OncePerRequestFilter {
+public class InternalAuthFilter implements WebFilter {
 
     private final ObjectMapper objectMapper;
 
@@ -28,18 +30,24 @@ public class InternalAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
 
-        String internalAuthHeader = request.getHeader("X-Internal-Auth");
+        ServerHttpRequest request = exchange.getRequest();
+        HttpHeaders headers = request.getHeaders();
+        List<String> internalAuthHeaders = headers.get("X-Internal-Auth");
 
-        if (StringUtils.hasText(internalAuthHeader)) {
+        String authValue;
+        if (internalAuthHeaders == null || internalAuthHeaders.isEmpty()) {
+            return chain.filter(exchange);
+        } else {
+            authValue = internalAuthHeaders.get(0);
+        }
+
+
+        if (StringUtils.hasText(authValue)) {
             try {
-
-                byte[] decodedBytes = Base64.getDecoder().decode(internalAuthHeader);
+                byte[] decodedBytes = Base64.getDecoder().decode(authValue);
                 InternalAuthData authContext = objectMapper.readValue(decodedBytes, InternalAuthData.class);
-
 
                 List<GrantedAuthority> authorities = authContext.getRoles().stream()
                         .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
@@ -54,11 +62,10 @@ public class InternalAuthFilter extends OncePerRequestFilter {
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
             } catch (Exception e) {
-                logger.warn("Failed to parse internal auth header", e);
+                log.warn("Failed to parse internal auth header", e);
             }
         }
-
-        filterChain.doFilter(request, response);
+        return chain.filter(exchange);
     }
 }
 

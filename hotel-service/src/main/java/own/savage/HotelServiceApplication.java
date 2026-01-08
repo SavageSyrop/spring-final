@@ -12,10 +12,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableDiscoveryClient
 @EnableTransactionManagement
 @EnableJpaRepositories("own.savage")
-public class Application {
+public class HotelServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(HotelServiceApplication.class, args);
     }
+
     @Bean
     public ModelMapper modelMapper() {
         return new ModelMapper();
