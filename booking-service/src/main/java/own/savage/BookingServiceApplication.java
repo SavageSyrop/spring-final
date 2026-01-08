@@ -8,9 +8,9 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @EnableDiscoveryClient
-public class Application {
+public class BookingServiceApplication {
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(BookingServiceApplication.class, args);
     }
 
     @Bean

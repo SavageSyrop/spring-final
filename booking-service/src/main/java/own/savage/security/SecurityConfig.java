@@ -9,20 +9,16 @@ import org.springframework.security.config.annotation.web.reactive.EnableWebFlux
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
 import org.springframework.security.web.server.SecurityWebFilterChain;
-import own.savage.jwt.JwtAuthFilter;
 import reactor.core.publisher.Mono;
-
-import static org.springframework.security.config.web.server.SecurityWebFiltersOrder.FIRST;
 
 @Configuration
 @EnableWebFluxSecurity
 @EnableMethodSecurity
 @RequiredArgsConstructor
 @ComponentScan(basePackages = {"own.savage.controller"})
-public class GatewaySecurityConfig {
+public class SecurityConfig {
 
-    private final JwtAuthFilter jwtAuthenticationFilter;
-    private final ReadWriteCorrelationFilter readWriteCorrelationFilter;
+    private final InternalAuthFilter internalAuthFilter;
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(ServerHttpSecurity http) {
@@ -48,8 +44,7 @@ public class GatewaySecurityConfig {
                             return exchange.getResponse().setComplete();
                         })
                 )
-                .addFilterAt(readWriteCorrelationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-                .addFilterAt(jwtAuthenticationFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .addFilterAt(internalAuthFilter, SecurityWebFiltersOrder.AUTHENTICATION)
                 .build();
     }
 }
