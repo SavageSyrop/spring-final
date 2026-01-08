@@ -1,24 +1,22 @@
 package own.savage.jwt;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Claims;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletRequestWrapper;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 
 @Component
-public class JwtAuthFilter extends OncePerRequestFilter {
+public class JwtAuthFilter implements WebFilter {
 
     private final JwtTokenService jwtService;
     private final ObjectMapper objectMapper;
@@ -29,12 +27,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain) throws ServletException, IOException {
-
-        // Извлекаем JWT из заголовка
-        String token = extractJwtFromRequest(request);
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        String token = extractJwtFromRequest(exchange);
 
         if (token != null && jwtService.validateToken(token)) {
             // Парсим claims из JWT
@@ -47,29 +41,36 @@ public class JwtAuthFilter extends OncePerRequestFilter {
                     .build();
 
             // Кодируем в Base64 для передачи
-            String encodedContext = Base64.getEncoder()
-                    .encodeToString(objectMapper.writeValueAsBytes(authContext));
+            String encodedContext;
+            try {
+                encodedContext = Base64.getEncoder()
+                        .encodeToString(objectMapper.writeValueAsBytes(authContext));
+            } catch (JsonProcessingException e) {
+                throw new RuntimeException(e);
+            }
 
-            // Создаем обертку запроса с новыми заголовками
-            ServletRequest wrappedRequest;
-
-            wrappedRequest = new ServletRequestWrapper(request);
-
-            wrappedRequest.setAttribute("X-Internal-Auth", encodedContext);
-            wrappedRequest.removeAttribute("Authorization");
-
-            filterChain.doFilter(wrappedRequest, response);
-            return;
+            return chain.filter(
+                    exchange.mutate().request(
+                                    exchange.getRequest().mutate()
+                                            .header("X-Internal-Auth", encodedContext)
+                                            .build())
+                            .build());
+        } else {
+            return chain.filter(exchange);
         }
-
-        filterChain.doFilter(request, response);
     }
 
-    private String extractJwtFromRequest(HttpServletRequest request) {
-        String bearerToken = request.getHeader("Authorization");
-        if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+    private String extractJwtFromRequest(ServerWebExchange exchange) {
+        ServerHttpRequest request = exchange.getRequest();
+        HttpHeaders headers = request.getHeaders();
+        List<String> authValues = headers.get("X-Correlation-Id");
+
+        if (authValues == null || authValues.isEmpty()) {
+            return null;
+        } else {
+            return authValues.get(0).substring(7);
         }
-        return null;
     }
 }
+
+

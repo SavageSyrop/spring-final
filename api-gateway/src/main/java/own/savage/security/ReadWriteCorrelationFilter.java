@@ -1,31 +1,40 @@
 package own.savage.security;
 
-import io.micrometer.core.instrument.util.IOUtils;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.server.reactive.ServerHttpRequest;
 import org.springframework.stereotype.Component;
-import org.springframework.web.filter.OncePerRequestFilter;
+import org.springframework.web.server.ServerWebExchange;
+import org.springframework.web.server.WebFilter;
+import org.springframework.web.server.WebFilterChain;
+import reactor.core.publisher.Mono;
 
-import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Component
 @Slf4j
-public class ReadWriteCorrelationFilter extends OncePerRequestFilter {
+public class ReadWriteCorrelationFilter implements WebFilter {
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String correlationIdValue = request.getHeader("X-Correlation-Id");
-        if (correlationIdValue == null || correlationIdValue.isEmpty()) {
-            correlationIdValue = UUID.randomUUID().toString();
+    public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
+        ServerHttpRequest request = exchange.getRequest();
+        HttpHeaders headers = request.getHeaders();
+        List<String> correlationIdValues = headers.get("X-Correlation-Id");
+        String correlationValue;
+        if (correlationIdValues == null || correlationIdValues.isEmpty()) {
+            correlationValue = UUID.randomUUID().toString();
+        } else {
+            correlationValue = correlationIdValues.get(0);
         }
-        response.setHeader("X-Correlation-Id", correlationIdValue);
-        request.setAttribute("correlationId", correlationIdValue);
-        log.debug("[{}] {} {} {}", correlationIdValue, request.getMethod(), request.getRequestURI(), IOUtils.toString(request.getInputStream()));
-        filterChain.doFilter(request, response);
+        log.debug("[{}] {} {}", correlationValue, request.getMethod(), exchange.getRequest().getPath());
+
+        return chain.filter(
+                exchange.mutate().request(
+                                exchange.getRequest().mutate()
+                                        .header("X-Correlation-Id", correlationValue)
+                                        .build())
+                        .build());
     }
 }
 
