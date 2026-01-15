@@ -39,8 +39,8 @@ public class HotelController {
         return dtos;
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<HotelDto> getHotelById(@PathVariable Long id) {
+    @GetMapping("/hotel")
+    public ResponseEntity<HotelDto> getHotelById(@RequestParam("id") Long id) {
         Optional<Hotel> hotel = hotelService.getHotel(id);
 
         if (hotel.isPresent()) {
@@ -50,7 +50,7 @@ public class HotelController {
         }
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     @PostMapping
     public HotelDto createHotel(@RequestBody HotelDto hotelDto) {
         Hotel hotel = convertToEntity(hotelDto);
@@ -58,10 +58,10 @@ public class HotelController {
         return convertToDto(hotelService.saveHotel(hotel));
     }
 
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN')")
     @PutMapping("/{id}")
-    public ResponseEntity<HotelDto> updateHotel(@PathVariable Long id, @RequestBody HotelDto dto) {
-        return hotelService.getHotel(id)
+    public ResponseEntity<HotelDto> updateHotel(@RequestBody HotelDto dto) {
+        return hotelService.getHotel(dto.getId())
                 .map(existing -> {
                     HotelDto hotelDto = convertToDto(hotelService.saveHotel(convertToEntity(dto)));
                     return ResponseEntity.ok(hotelDto);
@@ -70,25 +70,26 @@ public class HotelController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteHotel(@PathVariable Long id) {
+    @DeleteMapping("")
+    public ResponseEntity<Void> deleteHotel(@RequestParam("id") Long id) {
         hotelService.deleteHotel(id);
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/rooms")
     public List<RoomDto> getAllRoomsInHotel(@RequestParam Long hotelId) {
         Optional<Hotel> hotel = hotelService.getHotel(hotelId);
 
         if (hotel.isPresent()) {
-            return hotel.get().getRooms().stream().map(e -> modelMapper.map(e, RoomDto.class)).toList();
+            return hotel.get().getRooms().stream().map(this::convertToDto).toList();
         } else {
             throw new EntityNotFoundException("Hotel " + hotelId + " not found");
         }
     }
 
-    @PostMapping("/{hotelId}/rooms/popular")
-    public List<RoomDto> getPopilarRooms(@PathVariable Long hotelId) {
+    @PostMapping("/rooms/popular")
+    public List<RoomDto> getPopularRooms(@RequestParam Long hotelId) {
         List<RoomDto> dtos = new ArrayList<>();
         List<Room> popularRooms = hotelService.getMostPopularRoomsInHotel(hotelId);
 
@@ -98,26 +99,24 @@ public class HotelController {
         return dtos;
     }
 
-    private HotelDto convertToDto(Hotel hotel) throws ParseException {
+    public HotelDto convertToDto(Hotel hotel) throws ParseException {
         HotelDto hotelDto = modelMapper.map(hotel, HotelDto.class);
 
         if (hotel.getRooms() != null) {
             hotelDto.setRooms(hotel.getRooms().stream()
-                    .map(e -> modelMapper.map(e, RoomDto.class)).collect(Collectors.toList()));
+                    .map(this::convertToDto).collect(Collectors.toList()));
         } else {
             hotelDto.setRooms(new ArrayList<>());
         }
         return hotelDto;
     }
 
-    private Hotel convertToEntity(HotelDto hotelDto) throws ParseException {
+    public Hotel convertToEntity(HotelDto hotelDto) throws ParseException {
         return modelMapper.map(hotelDto, Hotel.class);
     }
 
-    private RoomDto convertToDto(Room room) throws ParseException {
-        RoomDto roomDto = modelMapper.map(room, RoomDto.class);
-        roomDto.setHotelId(room.getHotel().getId());
-        return roomDto;
+    public RoomDto convertToDto(Room room) throws ParseException {
+        return modelMapper.map(room, RoomDto.class);
     }
 }
 

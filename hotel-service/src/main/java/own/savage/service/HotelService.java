@@ -27,22 +27,27 @@ public class HotelService {
         this.lockDAO = lockDAO;
     }
 
+    @Transactional
     public List<Hotel> getAllHotels() {
         return hotelDao.findAll();
     }
 
+    @Transactional
     public Optional<Hotel> getHotel(Long id) {
         return hotelDao.findById(id);
     }
 
+    @Transactional
     public Hotel saveHotel(Hotel h) {
         return hotelDao.save(h);
     }
 
+    @Transactional
     public void deleteHotel(Long id) {
         hotelDao.deleteById(id);
     }
 
+    @Transactional
     public List<Room> getAllRoomsByHotelId(Long hotelId) {
         Optional<Hotel> hotelOptional = hotelDao.findById(hotelId);
         if (hotelOptional.isEmpty()) {
@@ -52,18 +57,22 @@ public class HotelService {
         }
     }
 
+    @Transactional
     public Optional<Room> getRoomById(Long roomId) {
         return roomDAO.findById(roomId);
     }
 
+    @Transactional
     public Room saveRoom(Room r) {
         return roomDAO.save(r);
     }
 
+    @Transactional
     public RoomReservationLock saveRoomReservationLock(RoomReservationLock r) {
         return lockDAO.save(r);
     }
 
+    @Transactional
     public void deleteRoom(Long id) {
         roomDAO.deleteById(id);
     }
@@ -100,6 +109,7 @@ public class HotelService {
         return lockDAO.save(lock);
     }
 
+    @Transactional
     public List<Room> getMostPopularRoomsInHotel(Long hotelId) {
         return roomDAO.findByHotelIdOrderByTimesBookedDesc(hotelId);
     }

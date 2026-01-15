@@ -33,8 +33,8 @@ public class RoomController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @PutMapping("/{id}")
-    public ResponseEntity<RoomDto> updateRoom(@PathVariable Long id, @RequestBody RoomDto roomDto) {
+    @PutMapping
+    public ResponseEntity<RoomDto> updateRoom(@RequestParam Long id, @RequestBody RoomDto roomDto) {
         if (hotelService.getRoomById(id).isPresent()) {
             return ResponseEntity.ok(convertToDto(hotelService.saveRoom(convertToEntity(roomDto))));
         } else {
@@ -43,24 +43,24 @@ public class RoomController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    @DeleteMapping
+    public ResponseEntity<Void> delete(@RequestParam Long id) {
         hotelService.deleteRoom(id);
         return ResponseEntity.noContent().build();
     }
 
-    @PostMapping("/{id}/hold")
-    public ResponseEntity<RoomReservationLock> hold(@PathVariable Long id, @RequestBody RoomReservationDto roomReservationDto) {
+    @PostMapping("/hold")
+    public ResponseEntity<RoomReservationLock> hold(@RequestBody RoomReservationDto roomReservationDto) {
         try {
-            RoomReservationLock lock = hotelService.holdRoom(id, roomReservationDto.getStartDate(), roomReservationDto.getEndDate());
+            RoomReservationLock lock = hotelService.holdRoom(roomReservationDto.getId(), roomReservationDto.getStartDate(), roomReservationDto.getEndDate());
             return ResponseEntity.ok(lock);
         } catch (IllegalStateException e) {
             return ResponseEntity.status(409).build();
         }
     }
 
-    @PostMapping("/release/{lockId}")
-    public ResponseEntity<RoomReservationLock> release(@PathVariable Long lockId) {
+    @PostMapping("/release")
+    public ResponseEntity<RoomReservationLock> release(@RequestParam Long lockId) {
         try {
             return ResponseEntity.ok(hotelService.releaseHold(lockId));
         } catch (IllegalStateException e) {
@@ -70,7 +70,7 @@ public class RoomController {
 
     private RoomDto convertToDto(Room room) throws ParseException {
         RoomDto roomDto = modelMapper.map(room, RoomDto.class);
-        roomDto.setHotelId(room.getHotel().getId());
+        roomDto.setHotelId(room.getHotelId());
         return roomDto;
     }
 

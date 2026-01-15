@@ -9,9 +9,7 @@ public class RoomDto {
 
     private Long id;
 
-    private String number;
-
-    private boolean available;
+    private Long number;
 
     private Long timesBooked;
 

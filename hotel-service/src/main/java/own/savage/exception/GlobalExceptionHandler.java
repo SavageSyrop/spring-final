@@ -14,22 +14,23 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalStateException.class)
     public Mono<ResponseEntity<ExceptionBody>> handleIllegalStateExceptionException(ServerWebExchange exchange, IllegalStateException ex) {
+
         return Mono.just(ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ExceptionBody(ex.getMessage(), exchange.getRequest().getHeaders().get("X-Correlation-Id").get(0))));
+                .body(new ExceptionBody(ex.getMessage(), exchange.getRequest().getHeaders().get("X-Correlation-Id"))));
     }
 
     @ExceptionHandler(value = {AuthenticationException.class, AuthorizationServiceException.class})
     public Mono<ResponseEntity<ExceptionBody>> handleAuthenticationException(ServerWebExchange exchange, Exception ex) {
         return Mono.just(ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(new ExceptionBody(ex.getMessage(), exchange.getRequest().getHeaders().get("X-Correlation-Id").get(0))));
+                .body(new ExceptionBody(ex.getMessage(), exchange.getRequest().getHeaders().get("X-Correlation-Id"))));
     }
 
     @ExceptionHandler(Exception.class)
     public Mono<ResponseEntity<ExceptionBody>> handleException(ServerWebExchange exchange, Exception ex) {
         return Mono.just(ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(new ExceptionBody(ex.getMessage(), exchange.getRequest().getHeaders().get("X-Correlation-Id").get(0))));
+                .body(new ExceptionBody(ex.getMessage(), exchange.getRequest().getHeaders().get("X-Correlation-Id"))));
     }
 }

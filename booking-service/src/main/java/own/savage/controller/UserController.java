@@ -31,7 +31,7 @@ public class UserController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public List<UserDto> list() {
         List<UserDto> dtos = new ArrayList<>();
         for (User user : userService.findAll()) {
@@ -40,9 +40,9 @@ public class UserController {
         return dtos;
     }
 
-    @GetMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDto> getUser(@PathVariable Long id) {
+    @GetMapping("/user")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<UserDto> getUser(@RequestParam Long id) {
         Optional<User> user = userService.findById(id);
 
         if (user.isPresent()) {
@@ -52,14 +52,14 @@ public class UserController {
         }
     }
 
-    @PutMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<UserDto> updateUser(@PathVariable Long id, @RequestBody UserDto userDto) {
-        Optional<User> user = userService.findById(id);
+    @PutMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<UserDto> updateUser(@RequestBody UserDto userDto) {
+        Optional<User> user = userService.findById(userDto.getId());
 
         if (user.isPresent()) {
             User userSave = convertToEntity(userDto);
-            userSave.setId(id);
+            userSave.setId(userDto.getId());
             userService.save(userSave);
             return ResponseEntity.ok(convertToDto(userSave));
         } else {
@@ -67,9 +67,9 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    @DeleteMapping
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
+    public ResponseEntity<Void> deleteUser(@RequestParam Long id) {
         userService.deleteById(id);
         return ResponseEntity.noContent().build();
     }

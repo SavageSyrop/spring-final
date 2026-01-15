@@ -12,6 +12,7 @@ import org.springframework.web.server.WebFilter;
 import org.springframework.web.server.WebFilterChain;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 
@@ -30,14 +31,15 @@ public class JwtAuthFilter implements WebFilter {
     public Mono<Void> filter(ServerWebExchange exchange, WebFilterChain chain) {
         String token = extractJwtFromRequest(exchange);
 
-        if (token != null && jwtService.validateToken(token)) {
+        if (token != null && jwtService.validateToken(token) && !jwtService.isTokenExpired(token)) {
             // Парсим claims из JWT
             Claims claims = jwtService.parseClaims(token);
-
+            List<String> roles = new ArrayList<>();
+            roles.add(claims.get("roles", String.class));
             // Создаем внутренние данные авторизации
             InternalAuthData authContext = InternalAuthData.builder()
                     .username(claims.getSubject())
-                    .roles(claims.get("roles", List.class))
+                    .roles(roles)
                     .build();
 
             // Кодируем в Base64 для передачи

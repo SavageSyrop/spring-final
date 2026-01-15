@@ -8,12 +8,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -38,37 +35,6 @@ public class JwtTokenService {
             keyBytes = Arrays.copyOf(keyBytes, 32);
         }
         return Keys.hmacShaKeyFor(keyBytes);
-    }
-
-    public String generateToken(String username, Collection<? extends GrantedAuthority> authorities) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("authorities", authorities.stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList()));
-
-        return generateToken(claims, username);
-    }
-
-    public String generateToken(Map<String, Object> claims, String subject) {
-        Instant now = Instant.now();
-        Instant expiration = now.plus(jwtExpirationMs, ChronoUnit.MILLIS);
-
-        return Jwts.builder()
-                .setClaims(claims)
-                .setSubject(subject)
-                .setIssuer(jwtIssuer)
-                .setIssuedAt(Date.from(now))
-                .setExpiration(Date.from(expiration))
-                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
-                .compact();
-    }
-
-
-    public String generateToken(InternalAuthData userDetails) {
-        Map<String, Object> claims = new HashMap<>();
-        claims.put("roles", userDetails.getRoles());
-
-        return generateToken(claims, userDetails.getUsername());
     }
 
     public boolean validateToken(String token) {
@@ -124,27 +90,5 @@ public class JwtTokenService {
         return authorities.stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
-    }
-
-    public String getUserIdFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return claims.get("userId", String.class);
-    }
-
-    public String getUsernameFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return claims.get("username", String.class);
-    }
-
-    public Map<String, Object> getAllClaimsFromToken(String token) {
-        Claims claims = parseClaims(token);
-        return new HashMap<>(claims);
-    }
-
-    public String extractTokenFromHeader(String authorizationHeader) {
-        if (StringUtils.hasText(authorizationHeader) && authorizationHeader.startsWith("Bearer ")) {
-            return authorizationHeader.substring(7);
-        }
-        return null;
     }
 }

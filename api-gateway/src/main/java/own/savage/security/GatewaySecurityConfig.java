@@ -4,7 +4,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -13,7 +12,6 @@ import own.savage.jwt.JwtAuthFilter;
 
 @Configuration
 @EnableWebFluxSecurity
-@EnableMethodSecurity
 @RequiredArgsConstructor
 @ComponentScan(basePackages = {"own.savage.controller"})
 public class GatewaySecurityConfig {
@@ -29,8 +27,10 @@ public class GatewaySecurityConfig {
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(
                                 "/",
-                                "/api/users/login",
-                                "/api/users/register"
+                                "/api/users/**",
+                                "/api/bookings/**",
+                                "/api/rooms/**",
+                                "/api/hotels/**"
                         ).permitAll()
 
                         .anyExchange().authenticated()

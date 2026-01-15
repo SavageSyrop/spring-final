@@ -50,7 +50,7 @@ public class InternalAuthFilter implements WebFilter {
                 InternalAuthData authContext = objectMapper.readValue(decodedBytes, InternalAuthData.class);
 
                 List<GrantedAuthority> authorities = authContext.getRoles().stream()
-                        .map(role -> new SimpleGrantedAuthority("ROLE_" + role))
+                        .map(role -> new SimpleGrantedAuthority(role))
                         .collect(Collectors.toList());
 
                 InternalAuthenticationToken authToken = new InternalAuthenticationToken(

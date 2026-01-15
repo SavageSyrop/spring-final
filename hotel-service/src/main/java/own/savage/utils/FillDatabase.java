@@ -32,37 +32,37 @@ public class FillDatabase implements CommandLineRunner {
 
         Room roomCalifornia = new Room();
         roomCalifornia.setAvailable(true);
-        roomCalifornia.setHotel(hotelCalifornia);
+        roomCalifornia.setHotelId(hotelCalifornia.getId());
         roomCalifornia.setNumber(1L);
         roomCalifornia.setTimesBooked(54L);
 
         Room roomCalifornia2 = new Room();
         roomCalifornia2.setAvailable(true);
-        roomCalifornia2.setHotel(hotelCalifornia);
+        roomCalifornia2.setHotelId(hotelCalifornia.getId());
         roomCalifornia2.setNumber(2L);
         roomCalifornia2.setTimesBooked(100L);
 
         Room roomCalifornia3 = new Room();
         roomCalifornia3.setAvailable(true);
-        roomCalifornia3.setHotel(hotelCalifornia);
+        roomCalifornia3.setHotelId(hotelCalifornia.getId());
         roomCalifornia3.setNumber(1L);
         roomCalifornia3.setTimesBooked(4L);
 
         Room roomBaroness = new Room();
         roomBaroness.setAvailable(false);
-        roomBaroness.setHotel(hotelBaroness);
+        roomBaroness.setHotelId(hotelBaroness.getId());
         roomBaroness.setNumber(1L);
         roomBaroness.setTimesBooked(1L);
 
         Room roomBaroness2 = new Room();
         roomBaroness2.setAvailable(true);
-        roomBaroness2.setHotel(hotelBaroness);
+        roomBaroness2.setHotelId(hotelBaroness.getId());
         roomBaroness2.setNumber(2L);
         roomBaroness2.setTimesBooked(22L);
 
         Room roomBaroness3 = new Room();
         roomBaroness3.setAvailable(true);
-        roomBaroness3.setHotel(hotelBaroness);
+        roomBaroness3.setHotelId(hotelBaroness.getId());
         roomBaroness3.setNumber(12L);
         roomBaroness3.setTimesBooked(4L);
 

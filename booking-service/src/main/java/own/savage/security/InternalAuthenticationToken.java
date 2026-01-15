@@ -23,7 +23,7 @@ public class InternalAuthenticationToken extends AbstractAuthenticationToken {
 
     @Override
     public Object getCredentials() {
-        return null;
+        return authData.getRoles();
     }
 
     @Override

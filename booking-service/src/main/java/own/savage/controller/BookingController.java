@@ -7,7 +7,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 import own.savage.dto.BookingDto;
 import own.savage.dto.RoomReservationDto;
@@ -34,20 +33,20 @@ public class BookingController {
     }
 
     @PostMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<BookingDto> createBooking(@RequestBody RoomReservationDto roomReservationDto) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
-        return ResponseEntity.ok(convertToDto(bookingService.createReservation(userDetails.getUsername(), roomReservationDto.getRoomId(), roomReservationDto.getStartDate(), roomReservationDto.getEndDate())));
+        return ResponseEntity.ok(convertToDto(bookingService.createReservation(username, roomReservationDto.getRoomId(), roomReservationDto.getStartDate(), roomReservationDto.getEndDate())));
     }
 
-    @PostMapping("/{bookingId}/cancel")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    public ResponseEntity<BookingDto> cancelBooking(@PathVariable Long bookingId) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    @PostMapping("/cancel")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
+    public ResponseEntity<BookingDto> cancelBooking(@RequestParam Long bookingId) {
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         Optional<Booking> booking = bookingService.getBookingById(bookingId);
         if (booking.isPresent()) {
-            if (!Objects.equals(userDetails.getUsername(), booking.get().getUsername())) {
+            if (!Objects.equals(username, booking.get().getUsername())) {
                 throw new AccessDeniedException("Not your booking");
             } else {
                 bookingService.cancelReservation(bookingId);
@@ -61,11 +60,11 @@ public class BookingController {
     }
 
     @GetMapping
-    @PreAuthorize("hasRole('ROLE_USER')")
+    @PreAuthorize("hasAnyAuthority('ROLE_USER', 'ROLE_ADMIN')")
     public ResponseEntity<List<BookingDto>> myBookings() {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String username = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         List<BookingDto> dtos = new ArrayList<>();
-        for (Booking booking : bookingService.findAllByUsername(userDetails.getUsername())) {
+        for (Booking booking : bookingService.findAllByUsername(username)) {
             dtos.add(convertToDto(booking));
         }
         return ResponseEntity.ok(dtos);

@@ -1,8 +1,7 @@
 package own.savage.entities;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.ManyToOne;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -17,8 +16,8 @@ public class Room extends AbstractEntity {
 
     private Long timesBooked;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Hotel hotel;
+    @Column(name = "hotel_id")
+    private Long hotelId;
 }
 
 

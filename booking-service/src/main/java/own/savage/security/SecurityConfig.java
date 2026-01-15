@@ -26,12 +26,12 @@ public class SecurityConfig {
                 .cors(ServerHttpSecurity.CorsSpec::disable)
                 .authorizeExchange(exchanges -> exchanges
                         .pathMatchers(
-                                "/",
+                                "/**",
                                 "/api/users/login",
                                 "/api/users/register"
                         ).permitAll()
 
-                        .anyExchange().authenticated()
+
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
                         .authenticationEntryPoint((exchange, ex) -> {

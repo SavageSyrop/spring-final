@@ -51,16 +51,18 @@ public class BookingService {
         booking = bookingDAO.save(booking);
 
         Map<String, String> payload = Map.of(
+                "roomId", roomId.toString(),
                 "startDate", start.toString(),
                 "endDate", end.toString()
         );
 
-        createReservation("/api/rooms/" + roomId + "/hold", payload).block(timeout);
+        createReservation("/api/rooms/hold", payload);
         booking.setStatus(BookingStatus.CONFIRMED);
 
         return bookingDAO.save(booking);
     }
 
+    @Transactional
     private Mono<String> createReservation(String path, Map<String, String> payload) {
         return webClient.post()
                 .uri(path)
@@ -72,9 +74,10 @@ public class BookingService {
                 .retryWhen(Retry.backoff(retries, Duration.ofMillis(600)).maxBackoff(Duration.ofSeconds(4)));
     }
 
+    @Transactional
     public Mono<List<RoomStatsDto>> getPopularRooms(Long hotelId) {
         return webClient.get()
-                .uri("/api/hotels/" + hotelId + "/rooms/popular")
+                .uri("/api/hotels/rooms/popular?hotelId=" + hotelId)
                 .retrieve()
                 .bodyToFlux(RoomStatsDto.class)
                 .collectList()
@@ -84,27 +87,35 @@ public class BookingService {
                         .toList());
     }
 
+    @Transactional
     public Optional<Booking> getBookingById(Long bookingId) {
         return bookingDAO.findById(bookingId);
     }
 
+    @Transactional
     public Booking updateBooking(Booking booking) {
         return bookingDAO.save(booking);
     }
 
+    @Transactional
     public List<Booking> findAllByUsername(String username) {
         return bookingDAO.findAllByUsername(username);
     }
 
+    @Transactional
     public Mono<String> cancelReservation(Long bookingId) {
         return webClient.post()
-                .uri("/api/hotels/release" + bookingId)
+                .uri("/api/hotels/release")
+                .bodyValue("{" +
+                        "\"id\": \"" + bookingId + "\"" +
+                        "}")
                 .retrieve()
                 .bodyToMono(String.class)
                 .timeout(timeout)
                 .retryWhen(Retry.backoff(retries, Duration.ofMillis(600)).maxBackoff(Duration.ofSeconds(4)));
     }
 
+    @Transactional
     public Booking save(Booking booking) {
         return bookingDAO.save(booking);
     }
