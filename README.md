@@ -41,15 +41,15 @@ Gateway (8880):
 - Бронирования
   - GET `/api/bookings` — получить все бронирования текущего пользователя
   - POST `/api/bookings` - создать бронирование номера
-  - POST `/api/bookings/{bookingId}/cancel` - отменить бронирование
+  - POST `/api/bookings/cancel?bookingId=value` - отменить бронирование
   - GET `/api/bookings/suggestions?hotelId=value` — получить наиболее снимаемые комнаты в отеле
 - Пользователи (только админ):
-  - GET, DELETE, PUT `/api/users/{id}`- получить, удалить, обновить любого пользователя по id
+  - GET, DELETE, PUT `/api/users?id=value`- получить, удалить, обновить любого пользователя по id
   - GET `/api/users` - получить всех пользователей
 - Отели и комнаты
-  - GET `/api/hotels`, GET `/api/hotels/{id}` - информация об отелях
-  - POST `/api/hotels`, PUT `/hotels/{id}`, DELETE `/hotels/{id}` - добавить отель, изменить данные отеля, удалить отель (только админ)
-  - POST `/api/rooms`, PUT `/api/rooms/{id}`, DELETE `/api/rooms/{id}`- добавить комнату, изменить данные комнаты, удалить комнату (только админ)
-  - POST `/api/rooms/{id}/hold` — забронировать комнату по id
-  - POST `/api/rooms/release/{lockId}` — освободить комнату по id бронирования
+  - GET `/api/hotels`, GET `/api/hotels/hotel?hotelId=value` - информация об отелях
+  - POST `/api/hotels`, PUT `/api/hotels?id=value`, DELETE `/api/hotels?id=value` - добавить отель, изменить данные отеля, удалить отель (только админ)
+  - POST `/api/rooms`, PUT `/api/rooms?id=value`, DELETE `/api/rooms?id=value`- добавить комнату, изменить данные комнаты, удалить комнату (только админ)
+  - POST `/api/rooms/hold` — забронировать комнату по id
+  - POST `/api/rooms/release` — освободить комнату по id бронирования
   
